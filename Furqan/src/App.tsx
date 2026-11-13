@@ -36,6 +36,7 @@ const MishkaLibraryPage = lazy(() => import('./pages/MishkaLibraryPage'));
 const MishkaCommunityPage = lazy(() => import('./pages/MishkaCommunityPage'));
 const MishkaGuidancePage = lazy(() => import('./pages/MishkaGuidancePage'));
 const MishkaArchivesPage = lazy(() => import('./pages/MishkaArchivesPage'));
+const MishkaPrayerPage = lazy(() => import('./pages/MishkaPrayerPage'));
 
 export default function App() {
   const { pathname } = useLocation();
@@ -103,6 +104,7 @@ export default function App() {
                 <Route path="mishka/library" element={<MishkaLibraryPage />} />
                 <Route path="mishka/community" element={<MishkaCommunityPage />} />
                 <Route path="mishka/guidance" element={<MishkaGuidancePage />} />
+                <Route path="mishka/prayer" element={<MishkaPrayerPage />} />
                 <Route path="mishka/archives" element={<MishkaArchivesPage />} />
                 <Route path="mishka/favorites" element={<FavoritesPage scope="mishka" />} />
                 <Route path="mishka/profile" element={<ProfilePage />} />

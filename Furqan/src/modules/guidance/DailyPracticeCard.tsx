@@ -35,7 +35,7 @@ export function DailyPracticeCard() {
         <label htmlFor="daily-reflection" className="text-[10px] font-semibold uppercase tracking-[0.15em] text-accent">
           Personal reflection
         </label>
-        <p className="mt-2 text-sm leading-relaxed text-ink2">What would you like to carry from today’s reading into tomorrow?</p>
+        <p className="mt-2 text-sm leading-relaxed text-ink2">What would you like to carry from today’s worship into tomorrow?</p>
         <textarea
           id="daily-reflection"
           value={reflection}

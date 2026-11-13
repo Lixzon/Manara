@@ -66,8 +66,7 @@ import { WorshipHub, type WorshipTab } from './src/components/WorshipHub';
 import { StoryReader } from './src/components/StoryReader';
 import { GuidanceHub } from './src/components/GuidanceHub';
 import { IslamicCalendarCard } from './src/components/IslamicCalendarCard';
-import { getDailyQuranJourney } from './src/domain/dailyQuranJourney';
-import { getDailyQhdReminder, type DailyQhdTheme } from './src/domain/dailyQhdReminder';
+import { getDailyQhdReminder } from './src/domain/dailyQhdReminder';
 import { getQuoteOfTheDay } from './src/domain/islamicQuotes';
 import { STORIES } from './src/domain/stories';
 import { resetPostSalahCounts } from './src/domain/tasbeeh';
@@ -254,45 +253,6 @@ const HOME_PHOTO_SOURCES = [
   require('./assets/share-backgrounds/lakeshore.jpg'),
 ] as const;
 const HOME_PHOTO_STORAGE_KEY = 'mishkah-home-photo-index';
-const HOME_REFLECTIONS: Record<DailyQhdTheme['id'], { question: string; action: string }> = {
-  remembrance: {
-    question: 'What moment today could you meet with remembrance of Allah?',
-    action: 'Pause for a minute of dhikr or a sincere du’a.',
-  },
-  mercy: {
-    question: 'Who around you might need patience, mercy, or practical help?',
-    action: 'Offer one specific kindness without expecting anything back.',
-  },
-  prayer: {
-    question: 'How can you make space for the next salah in your day?',
-    action: 'Check its time now and prepare a calm place to pray.',
-  },
-  forgiveness: {
-    question: 'What would you like to turn back to Allah about, without losing hope?',
-    action: 'Make tawbah and take one small step toward a better choice.',
-  },
-  charity: {
-    question: 'What time, skill, or resource could you share for good?',
-    action: 'Plan one manageable act of charity or service.',
-  },
-  character: {
-    question: 'Where could you choose fairness, excellence, or care today?',
-    action: 'Make one conversation more patient and considerate.',
-  },
-  gratitude: {
-    question: 'Which blessing in your life have you not paused to notice?',
-    action: 'Thank Allah for it, then use it in a good way.',
-  },
-};
-const WEEKLY_SURAH_SPOTLIGHTS = [
-  { surah: 1, name: 'Al-Fatiha', range: '1–7', note: 'A short opening prayer asking Allah for guidance.' },
-  { surah: 18, name: 'Al-Kahf', range: '1–10', note: 'Begin with verses about revelation, faith, and steadfastness.' },
-  { surah: 55, name: 'Ar-Rahman', range: '1–16', note: 'Reflect on signs of creation and the blessings named in these verses.' },
-  { surah: 67, name: 'Al-Mulk', range: '1–5', note: 'Read about creation and the signs in the heavens.' },
-  { surah: 93, name: 'Ad-Duha', range: '1–11', note: 'A reminder of care, gratitude, and kindness to others.' },
-  { surah: 94, name: 'Ash-Sharh', range: '1–8', note: 'Reflect on ease, perseverance, and turning to Allah.' },
-  { surah: 103, name: 'Al-Asr', range: '1–3', note: 'A concise reminder of faith, good deeds, truth, and patience.' },
-] as const;
 
 function chooseHomePhotoIndex(previousIndex?: number): number {
   if (previousIndex !== undefined) {
@@ -321,14 +281,6 @@ function initialHomePhotoIndex(): number {
     }
   }
   return chooseHomePhotoIndex();
-}
-
-function weeklySpotlightIndex(date = new Date()): number {
-  const dayMs = 86_400_000;
-  const utcDate = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  const mondayOffset = (new Date(utcDate).getUTCDay() + 6) % 7;
-  const monday = utcDate - mondayOffset * dayMs;
-  return Math.floor(monday / (7 * dayMs)) % WEEKLY_SURAH_SPOTLIGHTS.length;
 }
 
 export default function App() {
@@ -495,10 +447,7 @@ export default function App() {
     }
   }, [localDate]);
   const dailyQhd = getDailyQhdReminder(now);
-  const dailyReflection = HOME_REFLECTIONS[dailyQhd.theme.id];
-  const weeklySurah = WEEKLY_SURAH_SPOTLIGHTS[weeklySpotlightIndex(now)];
   const quoteOfTheDay = getQuoteOfTheDay(now);
-  const dailyJourney = getDailyQuranJourney(now);
   const isHomeScreen = screen === 'Prayer';
   const furqanBaseUrl = String(Constants.expoConfig?.extra?.furqanBaseUrl ?? '')
     .trim()
@@ -1054,7 +1003,7 @@ export default function App() {
           {screen === 'Prayer' ? (
             <>
               <View style={styles.introBlock}>
-                <Text style={styles.eyebrow}>YOUR DAY IN READING</Text>
+                <Text style={styles.eyebrow}>YOUR DAY IN WORSHIP</Text>
                 <Text style={styles.pageTitle}>A little closer, each day.</Text>
                 <Text style={styles.dateText}>{friendlyDate(now, city.timeZone)}</Text>
               </View>
@@ -1167,128 +1116,29 @@ export default function App() {
                 </View>
               </Pressable>
 
-              <View style={styles.sectionHeading}>
-                <View>
-                  <Text style={styles.sectionTitle}>A daily Quran journey</Text>
-                  <Text style={styles.sectionCaption}>Shared with Furqan · story, related verses, and reflection</Text>
-                </View>
-              </View>
-              <View style={styles.quotePhotoCard}>
-                <Image
-                  source={HOME_PHOTO_SOURCES[(homePhotoIndex + 6) % HOME_PHOTO_SOURCES.length]}
-                  resizeMode="cover"
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.qhdPhotoScrim} />
-                <View style={styles.qhdPhotoContent}>
-                  <Text style={styles.photoCardEyebrow}>DAILY QUR’AN JOURNEY · SHARED WITH FURQAN</Text>
-                  <Text style={styles.photoCardTitle}>The story of {dailyJourney.story.title}</Text>
-                  <Text style={styles.photoCardBody}>Read related Qur’an passages in Furqan, the long story here, then pause for a short reflection.</Text>
-                  <View style={styles.choiceRow}>
-                    {dailyJourney.story.quranRefs.map((reference) => (
-                      <Pressable
-                        accessibilityRole="link"
-                        key={`${reference.surah}:${reference.from}`}
-                        onPress={() => {
-                          if (!furqanBaseUrl) {
-                            setNotice('The Furqan reader is not configured for this build.');
-                            return;
-                          }
-                          void openSupportLink(`${furqanBaseUrl}/surah/${reference.surah}?ayah=${reference.from}`);
-                        }}
-                        style={styles.photoCardChip}
-                      >
-                        <Text style={styles.photoCardChipText}>
-                          {reference.surah}:{reference.from}{reference.to && reference.to !== reference.from ? `–${reference.to}` : ''} ›
-                        </Text>
-                      </Pressable>
-                    ))}
+              {isFridayInCity ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Open the Friday Qur’an reading, Surah Al-Kahf, in Furqan"
+                  onPress={() => {
+                    void openSupportLink(`${furqanBaseUrl}/surah/18?ayah=1`);
+                  }}
+                  style={styles.quotePhotoCard}
+                >
+                  <Image
+                    source={HOME_PHOTO_SOURCES[(homePhotoIndex + 4) % HOME_PHOTO_SOURCES.length]}
+                    resizeMode="cover"
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <View style={styles.qhdPhotoScrim} />
+                  <View style={styles.qhdPhotoContent}>
+                    <Text style={styles.photoCardEyebrow}>FRIDAY QUR’AN READING</Text>
+                    <Text style={styles.photoCardTitle}>Surah Al-Kahf</Text>
+                    <Text style={styles.photoCardBody}>Set aside time to read and reflect on the Qur’an’s account of faith, trials, and humility.</Text>
+                    <Text style={styles.photoCardLink}>Qur’an 18 · Read in Furqan ›</Text>
                   </View>
-                  <Text style={styles.photoCardEyebrow}>A SHORT REFLECTION</Text>
-                  <Text style={styles.photoCardBody}>{dailyJourney.reflection}</Text>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Read the long story of ${dailyJourney.story.title}`}
-                    onPress={() => setJourneyStory(dailyJourney.story)}
-                    style={styles.retryVerseButton}
-                  >
-                    <Text style={styles.photoCardLink}>Read the long story ›</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              <View style={styles.quotePhotoCard}>
-                <Image
-                  source={HOME_PHOTO_SOURCES[(homePhotoIndex + 2) % HOME_PHOTO_SOURCES.length]}
-                  resizeMode="cover"
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.qhdPhotoScrim} />
-                <View style={styles.qhdPhotoContent}>
-                  <Text style={styles.photoCardEyebrow}>REFLECT &amp; ACT · {dailyQhd.theme.title.toUpperCase()}</Text>
-                  <Text style={styles.photoCardTitle}>{dailyReflection.question}</Text>
-                  <Text style={styles.photoCardBody}>
-                    <Text style={styles.photoCardEyebrow}>ONE SMALL STEP · </Text>
-                    {dailyReflection.action}
-                  </Text>
-                  <Text style={styles.photoCardLink}>
-                    A reflection prompt inspired by Qur’an {dailyQhd.theme.surah}:{dailyQhd.theme.ayah}; not a quoted tafsir.
-                  </Text>
-                  <Pressable
-                    accessibilityRole="link"
-                    accessibilityLabel={`Read Qur’an ${dailyQhd.theme.surah}, verse ${dailyQhd.theme.ayah} in Furqan`}
-                    onPress={() => {
-                      void openSupportLink(`${furqanBaseUrl}/surah/${dailyQhd.theme.surah}?ayah=${dailyQhd.theme.ayah}`);
-                    }}
-                    style={styles.retryVerseButton}
-                  >
-                    <Text style={styles.photoCardLink}>Read the verse in Furqan ›</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Read this week’s surah spotlight, ${weeklySurah.name}`}
-                onPress={() => {
-                  void openSupportLink(`${furqanBaseUrl}/surah/${weeklySurah.surah}?ayah=1`);
-                }}
-                style={styles.quotePhotoCard}
-              >
-                <Image
-                  source={HOME_PHOTO_SOURCES[(homePhotoIndex + 5) % HOME_PHOTO_SOURCES.length]}
-                  resizeMode="cover"
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.qhdPhotoScrim} />
-                <View style={styles.qhdPhotoContent}>
-                  <Text style={styles.photoCardEyebrow}>THIS WEEK’S SURAH SPOTLIGHT</Text>
-                  <Text style={styles.photoCardTitle}>{weeklySurah.name}</Text>
-                  <Text style={styles.photoCardBody}>{weeklySurah.note}</Text>
-                  <Text style={styles.photoCardLink}>Qur’an {weeklySurah.surah}:{weeklySurah.range} · Read in Furqan ›</Text>
-                </View>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Open the Friday Qur’an reading, Surah Al-Kahf, in Furqan"
-                onPress={() => {
-                  void openSupportLink(`${furqanBaseUrl}/surah/18?ayah=1`);
-                }}
-                style={styles.quotePhotoCard}
-              >
-                <Image
-                  source={HOME_PHOTO_SOURCES[(homePhotoIndex + 4) % HOME_PHOTO_SOURCES.length]}
-                  resizeMode="cover"
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.qhdPhotoScrim} />
-                <View style={styles.qhdPhotoContent}>
-                  <Text style={styles.photoCardEyebrow}>FRIDAY QUR’AN READING</Text>
-                  <Text style={styles.photoCardTitle}>Surah Al-Kahf</Text>
-                  <Text style={styles.photoCardBody}>Set aside time to read and reflect on the Qur’an’s account of faith, trials, and humility.</Text>
-                  <Text style={styles.photoCardLink}>Qur’an 18 · Read in Furqan ›</Text>
-                </View>
-              </Pressable>
+                </Pressable>
+              ) : null}
 
               {isHomeScreen ? (
                 <>

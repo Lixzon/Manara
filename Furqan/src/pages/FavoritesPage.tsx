@@ -17,9 +17,11 @@ import {
   type LikesState,
 } from '../store/slices/likesSlice';
 import { useQuran } from '../data/QuranProvider';
-import { DUA_THEME_DESCRIPTIONS, DUAS } from '../data/duas';
+import { DUA_THEME_DESCRIPTIONS, DUAS, type DuaTheme } from '../data/duas';
 import { QUOTE_THEME_LABELS, QUOTES } from '../data/quotes';
 import { DAILY_HADITHS } from '../modules/guidance/dailyHadith';
+import { HADITH_COLLECTIONS } from '../../../Mishkah/src/domain/hadith';
+import { HISN_AL_MUSLIM_DUAS } from '../../../Mishkah/src/domain/adhkar';
 import { STORIES, STORY_SECTIONS, type StorySectionId } from '../../../Mishkah/src/domain/stories';
 import { useXpActions } from '../services/useLikes';
 import { PageHeader, EmptyState } from '../components/ui/common';
@@ -34,6 +36,28 @@ import { recordXpAction } from '../store/slices/progressSlice';
 
 type Tab = LikeKind;
 type FavoritesScope = 'furqan' | 'mishka';
+type FavoriteHadith = {
+  id: string;
+  title: string;
+  summary: string;
+  description: string;
+  reference: string;
+};
+
+const QHD_DUA_THEMES: Record<(typeof HISN_AL_MUSLIM_DUAS)[number]['category'], DuaTheme> = {
+  travel: 'travel',
+  anxiety: 'distress',
+  sleep: 'daily',
+  morning: 'daily',
+  home: 'home',
+  food: 'food',
+  forgiveness: 'worship',
+  mercy: 'worship',
+  salah: 'worship',
+  charity: 'worship',
+  character: 'worship',
+  provision: 'daily',
+};
 
 const TABS: Array<{ value: Tab; label: string; icon: 'stack' | 'book' | 'quote' | 'sparkle' }> = [
   { value: 'surah', label: 'Surahs', icon: 'stack' },
@@ -132,7 +156,21 @@ export default function FavoritesPage({
   const likedDuas = useMemo(
     () =>
       likes.duas
-        .map((id) => DUAS.find((dua) => dua.id === id) ?? null)
+        .map((id): (typeof DUAS)[number] | null => {
+          const furqanDua = DUAS.find((dua) => dua.id === id);
+          if (furqanDua) return furqanDua;
+          const qhdDua = HISN_AL_MUSLIM_DUAS.find((dua) => dua.id === id);
+          if (!qhdDua) return null;
+          return {
+            id: qhdDua.id,
+            title: qhdDua.title,
+            theme: QHD_DUA_THEMES[qhdDua.category],
+            arabic: qhdDua.arabic,
+            transliteration: qhdDua.transliteration,
+            translation: qhdDua.meaning,
+            source: qhdDua.reference,
+          };
+        })
         .filter((dua): dua is NonNullable<typeof dua> => dua !== null)
         .filter((dua) => matches(dua.translation, dua.arabic, dua.source, dua.theme)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -142,7 +180,14 @@ export default function FavoritesPage({
   const likedHadiths = useMemo(
     () =>
       likes.hadiths
-        .map((id) => DAILY_HADITHS.find((hadith) => hadith.id === id) ?? null)
+        .map((id): FavoriteHadith | null => {
+          const dailyHadith = DAILY_HADITHS.find((hadith) => hadith.id === id);
+          if (dailyHadith) return dailyHadith;
+          const qhdHadith = HADITH_COLLECTIONS.find((hadith) => hadith.id === id);
+          return qhdHadith
+            ? { ...qhdHadith, description: qhdHadith.chapter }
+            : null;
+        })
         .filter((hadith): hadith is NonNullable<typeof hadith> => hadith !== null)
         .filter((hadith) => matches(hadith.title, hadith.summary, hadith.reference)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,13 +226,17 @@ export default function FavoritesPage({
     });
   const makeShareUrl = (query: string) =>
     new URL(`${import.meta.env.BASE_URL}${query}`, window.location.origin).toString();
-  const openHadithShare = (hadith: (typeof DAILY_HADITHS)[number]) => setShareContent({
+  const openHadithShare = (hadith: FavoriteHadith) => setShareContent({
     kind: 'hadith',
     title: hadith.title,
     body: hadith.summary,
     description: hadith.description,
     source: hadith.reference,
-    shareUrl: makeShareUrl(`journey?hadith=${encodeURIComponent(hadith.id)}`),
+    shareUrl: makeShareUrl(
+      DAILY_HADITHS.some((entry) => entry.id === hadith.id)
+        ? `journey?hadith=${encodeURIComponent(hadith.id)}`
+        : 'mishka/favorites?tab=hadith',
+    ),
   });
   const openDuaShare = (dua: (typeof DUAS)[number]) => setShareContent({
     kind: 'dua',
@@ -197,7 +246,11 @@ export default function FavoritesPage({
     arabic: dua.arabic,
     transliteration: dua.transliteration,
     source: dua.source,
-    shareUrl: makeShareUrl(`quotes?view=duas&id=${encodeURIComponent(dua.id)}`),
+    shareUrl: makeShareUrl(
+      DUAS.some((entry) => entry.id === dua.id)
+        ? `quotes?view=duas&id=${encodeURIComponent(dua.id)}`
+        : 'mishka/favorites?tab=dua',
+    ),
   });
   const openQuoteShare = (quote: (typeof QUOTES)[number]) => setShareContent({
     kind: 'saying',
@@ -452,7 +505,7 @@ export default function FavoritesPage({
 
           {tab === 'dua' &&
             (likedDuas.length === 0 ? (
-              <EmptyState icon="sparkle" title="No liked duas" message={needle ? 'No liked dua matches that search.' : 'Tap the heart on a dua in Sayings & Quotes.'} />
+              <EmptyState icon="sparkle" title="No liked duas" message={needle ? 'No liked dua matches that search.' : 'Tap the heart on a dua in Mishka or Sayings & Quotes.'} />
             ) : (
               likedDuas.map((dua) => (
                 <Card
@@ -472,7 +525,7 @@ export default function FavoritesPage({
 
           {tab === 'hadith' &&
             (likedHadiths.length === 0 ? (
-              <EmptyState icon="book" title="No liked Hadith" message={needle ? 'No liked Hadith matches that search.' : 'Tap the heart on the daily Hadith card to save it here.'} />
+              <EmptyState icon="book" title="No liked Hadith" message={needle ? 'No liked Hadith matches that search.' : 'Tap the heart on a Hadith in Mishka to save it here.'} />
             ) : (
               likedHadiths.map((hadith) => (
                 <Card

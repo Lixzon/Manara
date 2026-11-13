@@ -1,17 +1,15 @@
-import { ReadDashboard } from '../../components/home/ReadDashboard';
 import { PageHeader } from '../../components/ui/common';
-import { DailyHadithCard } from './DailyHadithCard';
 import { DailyPracticeCard } from './DailyPracticeCard';
+import { QhdReminderCard } from './QhdReminderCard';
 
 export default function JourneyPage() {
   return (
     <div className="page-enter space-y-3">
       <PageHeader
         title="Mishka"
-        subtitle="A daily rhythm of Quran, reflection, and small acts of worship."
+        subtitle="A daily companion for worship, remembrance, and reflection."
       />
-      <ReadDashboard />
-      <DailyHadithCard />
+      <QhdReminderCard />
       <DailyPracticeCard />
     </div>
   );

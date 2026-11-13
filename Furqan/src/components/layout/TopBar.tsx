@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../store';
 import { useVoiceSearch } from '../search/VoiceSearchModal';
 import { QuranSearchModal } from '../search/QuranSearchModal';
@@ -11,6 +11,7 @@ import { SwitchAppsButton } from '../../shared/SectionSwitcher';
 export function TopBar() {
   const readingMode = useAppSelector((s) => s.settings.readingMode);
   const location = useLocation();
+  const navigate = useNavigate();
   const voiceSearch = useVoiceSearch();
   const [searchOpen, setSearchOpen] = useState(false);
   const isMishkaHome = location.pathname === '/' || location.pathname === '/journey';
@@ -22,8 +23,18 @@ export function TopBar() {
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-3 py-2 sm:px-4">
           <SwitchAppsButton className={readingMode ? 'md:inline-flex' : 'md:hidden'} />
           {isMishkaHome && !readingMode && (
-            <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <div className="flex shrink-0 items-center gap-2">
               <StreakHub />
+              <button
+                type="button"
+                onClick={() => navigate('/mishka/prayer')}
+                aria-label="Open prayer schedule and global places"
+                title="Prayer schedule and global places"
+                className="pressable inline-flex h-9 items-center gap-1.5 rounded-full border border-line bg-surface2 px-2.5 text-xs font-medium text-muted transition hover:text-ink"
+              >
+                <Icon name="clock" size={16} />
+                <span className="hidden sm:inline">Prayer</span>
+              </button>
             </div>
           )}
           {isHome && (
