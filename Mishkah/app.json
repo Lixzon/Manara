@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Mishkah",
+    "slug": "mishkah",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "mishkah",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.lixzon.mishkah",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.lixzon.mishkah",
+      "adaptiveIcon": {
+        "backgroundColor": "#145B50",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "name": "Mishkah",
+      "shortName": "Mishkah",
+      "description": "The Seeker who carries the Light of Guidance across horizons.",
+      "themeColor": "#145B50",
+      "backgroundColor": "#F3F5F1",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-notifications",
+      "expo-splash-screen"
+    ]
+  }
+}

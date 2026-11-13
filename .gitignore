@@ -1,0 +1,25 @@
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+dist-ssr/
+*.local
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel/
+coverage/
+test-results/
+**/test-results/
+.expo/
+**/.expo/
+
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+
+# Generated data assets are committed intentionally; ignore raw downloads.
+.cache-data/
+**/.cache-data/

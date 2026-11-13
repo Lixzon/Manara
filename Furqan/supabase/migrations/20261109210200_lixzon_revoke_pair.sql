@@ -1,0 +1,1 @@
+-- Historical migration retained as a no-op. Pairing has been removed.

@@ -1,0 +1,2 @@
+-- Historical migration retained as a no-op. The unified Manāra app does not
+-- use the old cross-device record-sync table.
