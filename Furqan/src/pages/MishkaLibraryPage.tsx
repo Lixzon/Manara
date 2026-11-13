@@ -3,15 +3,16 @@ import { Icon, type IconName } from '../components/ui/Icon';
 import { PageHeader } from '../components/ui/common';
 
 const COLLECTIONS: { title: string; description: string; to: string; icon: IconName; label: string }[] = [
-  { title: 'Stories & archives', description: 'Short introductions, source-linked stories, and reviewed archive notes.', to: '/mishka/archives', icon: 'book', label: 'Explore archive' },
+  { title: 'Prophets & stories', description: 'Explore source-linked accounts of the Prophets and notable people in Islamic history.', to: '/mishka/stories', icon: 'book', label: 'Read stories' },
+  { title: 'Archives & themes', description: 'Browse concise, reviewed notes on Islamic history and themes.', to: '/mishka/archives', icon: 'book', label: 'Explore archive' },
   { title: 'Du’as & sayings', description: 'Browse supplications and reflections, and keep the ones you value close.', to: '/quotes?view=duas', icon: 'quote', label: 'Browse collection' },
-  { title: 'Favorites', description: 'Return to the duas, sayings, stories, and Quran items you have saved.', to: '/mishka/favorites?section=favorites', icon: 'heart', label: 'View favorites' },
+  { title: 'Favorites', description: 'Return to the Hadith, duas, sayings, and stories you have saved in Mishka.', to: '/mishka/favorites?section=favorites', icon: 'heart', label: 'View favorites' },
 ];
 
 export default function MishkaLibraryPage() {
   return (
     <div className="page-enter">
-      <PageHeader title="Mishka Library" subtitle="A home for reflections, supplications, and source-linked stories." />
+      <PageHeader title="Mishka Library" subtitle="A home for source-linked stories, reflections, and supplications." />
       <div className="grid gap-3 sm:grid-cols-2">
         {COLLECTIONS.map((collection) => (
           <Link

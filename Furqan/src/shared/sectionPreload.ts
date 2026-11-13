@@ -8,6 +8,8 @@ export async function preloadSectionDestination(section: AppSection, destination
 
   const pagePromises: Promise<unknown>[] = [modulePromise];
   if (destination.startsWith('/mishka/archives')) pagePromises.push(import('../pages/MishkaArchivesPage'));
+  else if (destination.startsWith('/mishka/stories')) pagePromises.push(import('../pages/StoriesPage'));
+  else if (destination.startsWith('/mishka/favorites')) pagePromises.push(import('../pages/FavoritesPage'));
   else if (destination.startsWith('/mishka/guidance')) pagePromises.push(import('../pages/MishkaGuidancePage'));
   else if (destination.startsWith('/mishka/library')) pagePromises.push(import('../pages/MishkaLibraryPage'));
   else if (destination.startsWith('/mishka/community')) pagePromises.push(import('../pages/MishkaCommunityPage'));

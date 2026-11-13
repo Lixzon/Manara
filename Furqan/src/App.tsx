@@ -18,6 +18,7 @@ import { DeepLinkHost } from './components/DeepLinkHost';
 import { CloudSyncProvider } from './components/CloudSync';
 
 const LibraryPage = lazy(() => import('./pages/LibraryPage'));
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const SurahReader = lazy(() => import('./pages/SurahReader'));
 const PlaylistsPage = lazy(() => import('./pages/PlaylistsPage'));
 const PlaylistDetailPage = lazy(() => import('./pages/PlaylistDetailPage'));
@@ -29,7 +30,6 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SupportPage = lazy(() => import('./pages/SupportPage'));
 const DiagnosticsPage = lazy(() => import('./pages/DiagnosticsPage'));
-const MishkahAssistantPage = lazy(() => import('./pages/MishkahAssistantPage'));
 const QuotesPage = lazy(() => import('./pages/QuotesPage'));
 const StoriesPage = lazy(() => import('./pages/StoriesPage'));
 const MishkaLibraryPage = lazy(() => import('./pages/MishkaLibraryPage'));
@@ -104,7 +104,7 @@ export default function App() {
                 <Route path="mishka/community" element={<MishkaCommunityPage />} />
                 <Route path="mishka/guidance" element={<MishkaGuidancePage />} />
                 <Route path="mishka/archives" element={<MishkaArchivesPage />} />
-                <Route path="mishka/favorites" element={<LibraryPage />} />
+                <Route path="mishka/favorites" element={<FavoritesPage scope="mishka" />} />
                 <Route path="mishka/profile" element={<ProfilePage />} />
                 <Route path="surah/:number" element={<SurahReader />} />
                 <Route path="playlists" element={<PlaylistsPage />} />
@@ -112,7 +112,8 @@ export default function App() {
                 <Route path="player" element={<NowPlayingPage />} />
                 <Route path="guidance" element={<GuidancePage />} />
                 <Route path="quotes" element={<QuotesPage />} />
-                <Route path="stories" element={<StoriesPage />} />
+                <Route path="mishka/stories" element={<StoriesPage />} />
+                <Route path="stories" element={<LegacyStoriesRedirect />} />
                 <Route path="favorites" element={<LegacyFavoritesRedirect />} />
                 <Route path="bookmarks" element={<Navigate to="/library?tab=ayah&section=favorites" replace />} />
                 <Route path="progress" element={<ProgressPage />} />
@@ -121,7 +122,6 @@ export default function App() {
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="support" element={<SupportPage />} />
                 <Route path="diagnostics" element={<DiagnosticsPage />} />
-                <Route path="mishkah" element={<MishkahAssistantPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
@@ -135,6 +135,11 @@ export default function App() {
       </QuranProvider>
     </ErrorBoundary>
   );
+}
+
+function LegacyStoriesRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={{ pathname: '/mishka/stories', search, hash }} replace />;
 }
 
 function LegacyFavoritesRedirect() {

@@ -125,7 +125,6 @@ export function getPrayerTimesForDate(
   const offset = timeZoneOffsetAt(localDate, city.timeZone);
   const solarNoon = 720 - 4 * city.longitude - equationOfTime + offset;
   const sunriseAngle = hourAngle(city.latitude, declination, SOLAR_ALTITUDE);
-  const sunsetAngle = sunriseAngle;
   const daylightHalf = sunriseAngle === undefined ? 360 : sunriseAngle * 4;
   const sunrise = solarNoon - daylightHalf;
   const sunset = solarNoon + daylightHalf;

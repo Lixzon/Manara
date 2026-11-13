@@ -41,7 +41,7 @@ export default function StoriesPage() {
   const openStory = (story: Story) => setParam('story', story.id);
   const shareStory = (story: Story) => {
     const shareUrl = new URL(
-      `${import.meta.env.BASE_URL}stories?story=${encodeURIComponent(story.id)}`,
+      `${import.meta.env.BASE_URL}mishka/stories?story=${encodeURIComponent(story.id)}`,
       window.location.origin,
     ).toString();
     setShareContent({

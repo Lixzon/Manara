@@ -34,6 +34,27 @@ export const PRACTICAL_GUIDANCE: readonly PracticalGuidance[] = [
     ],
   },
   {
+    id: 'talbinah',
+    title: 'Talbinah in a report about care and grief',
+    summary: 'A report from ʿA’ishah describes recommending talbinah for the sick and grieving, and quotes the Prophet ﷺ describing comfort for the patient and relief from some sorrow.',
+    practice: 'This narration is not a universal cure or substitute for medical care. Consider allergies and individual health needs, and consult a qualified health professional when ill.',
+    sources: [{ label: 'Sahih al-Bukhari 5689', url: 'https://sunnah.com/bukhari:5689' }],
+  },
+  {
+    id: 'ajwa-dates',
+    title: 'Ajwa dates in a specific narration',
+    summary: 'A report mentions seven Ajwa dates in the morning and protection from poison and magic for that day.',
+    practice: 'Keep the wording and context of the narration clear: this is not clinical evidence or a replacement for emergency treatment. Seek urgent medical help after possible poisoning.',
+    sources: [{ label: 'Sahih al-Bukhari 5445', url: 'https://sunnah.com/bukhari:5445' }],
+  },
+  {
+    id: 'cupping-and-care',
+    title: 'Cupping in Prophetic medicine reports',
+    summary: 'A narration records cupping and sea incense among treatments mentioned in its historical context.',
+    practice: 'Cupping can cause harm or infection if performed unsafely. Only discuss it with a qualified clinician and use a properly trained practitioner; it must not replace needed medical care.',
+    sources: [{ label: 'Sahih al-Bukhari 5696', url: 'https://sunnah.com/bukhari:5696' }],
+  },
+  {
     id: 'lawful-food',
     title: 'Choose food within the lawful bounds',
     summary: 'The Qur’an tells people to eat what is lawful and good, and identifies specific prohibited foods.',
@@ -100,9 +121,12 @@ export const PRACTICAL_GUIDANCE: readonly PracticalGuidance[] = [
   {
     id: 'rest-and-sleep',
     title: 'Make rest part of a balanced day',
-    summary: 'A Prophetic report describes making ablution before sleep and lying on the right side.',
-    practice: 'These are reported bedtime etiquettes. Keep rest balanced with responsibilities, and do not let a voluntary practice delay needed sleep or care.',
-    sources: [{ label: 'Sahih al-Bukhari 6311', url: 'https://sunnah.com/bukhari:6311' }],
+    summary: 'A sound report describes making ablution before sleep and lying on the right side. A separate report discouraging lying on the stomach is graded weak by al-Albani.',
+    practice: 'The right-side practice is a reported bedtime etiquette. Do not present the weak report as a definitive prohibition; use a position needed for comfort or medical care.',
+    sources: [
+      { label: 'Sahih al-Bukhari 6311', url: 'https://sunnah.com/bukhari:6311' },
+      { label: 'Sunan Abi Dawud 5040 (graded weak)', url: 'https://sunnah.com/abudawud:5040' },
+    ],
   },
   {
     id: 'kindness-of-anas',

@@ -27,7 +27,7 @@ interface CalendarReference {
 
 interface EventDetails {
   lines: string[];
-  references: CalendarReference[];
+  references: readonly CalendarReference[];
 }
 
 const CALENDAR_PHOTOS = [
@@ -43,11 +43,27 @@ const CALENDAR_PHOTOS = [
 ] as const;
 
 const EVENT_SUMMARIES: Record<string, string> = {
-  'islamic-new-year': 'The first day of Muharram marks the start of a new Hijri year. The calendar date alone does not prescribe a special act of worship.',
+  'islamic-new-year': 'The first day of Muharram begins a Hijri year. The Hijri era is counted from the Hijrah; this date is not itself the anniversary of the migration, nor does the date alone prescribe a special act of worship.',
   ashura: 'Ashura is the tenth day of Muharram. Some Muslims observe fasting on this day; check trusted local guidance for its practice.',
   'eid-al-fitr': 'The first day of Shawwal follows Ramadan. Its date is an estimate until confirmed by local moon sighting.',
-  'day-of-arafah': 'The ninth day of Dhu al-Hijjah falls during the Hajj season, one day before Eid al-Adha.',
+  'first-ten-dhul-hijjah': 'The first ten days of Dhu al-Hijjah are a season for increased good deeds. The exact Gregorian dates depend on the local calendar and moon sighting.',
+  'hajj-rites-begin': 'The main Hajj rites take place across 8–13 Dhu al-Hijjah. Pilgrims should follow their Hajj group and qualified local guidance.',
+  'day-of-arafah': 'The ninth day of Dhu al-Hijjah falls during the Hajj season, one day before Eid al-Adha. Its voluntary fast is for those not performing Hajj.',
   'eid-al-adha': 'The tenth day of Dhu al-Hijjah marks Eid al-Adha. Its date is an estimate and can differ with local moon sighting.',
+  'tashreeq-begins': 'The Days of Tashreeq are 11–13 Dhu al-Hijjah. Fasting is generally not observed on these days; ask a qualified scholar about the specific Hajj concession.',
+};
+
+const EVENT_REFERENCES: Record<string, readonly CalendarReference[]> = {
+  ashura: [{ label: 'Sahih al-Bukhari 2004', url: 'https://sunnah.com/bukhari:2004' }],
+  'eid-al-fitr': [{ label: 'Qur’an 2:185', url: 'https://quran.com/2/185' }],
+  'first-ten-dhul-hijjah': [{ label: 'Sahih al-Bukhari 969', url: 'https://sunnah.com/bukhari:969' }],
+  'hajj-rites-begin': [
+    { label: 'Qur’an 3:97', url: 'https://quran.com/3/97' },
+    { label: 'Qur’an 2:197', url: 'https://quran.com/2/197' },
+  ],
+  'day-of-arafah': [{ label: 'Sahih Muslim 1162', url: 'https://sunnah.com/muslim:1162' }],
+  'eid-al-adha': [{ label: 'Qur’an 22:28–37', url: 'https://quran.com/22/28-37' }],
+  'tashreeq-begins': [{ label: 'Sahih Muslim 1141', url: 'https://sunnah.com/muslim:1141' }],
 };
 
 const RAMADAN_REFERENCES: readonly CalendarReference[] = [
@@ -73,7 +89,7 @@ function eventDetails(event: UpcomingIslamicEvent): EventDetails {
         `Hijri date: ${hijriDate}.`,
         `Estimated Gregorian date: ${formatGregorianDate(event.date)}.`,
       ],
-      references: [],
+      references: EVENT_REFERENCES[event.id] ?? [],
     };
   }
 

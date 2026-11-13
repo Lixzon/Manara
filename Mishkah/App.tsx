@@ -23,7 +23,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getContextualAnswer, getLocalAnswer, getLocalFaqs } from './src/domain/assistant';
 import {
   DEFAULT_CITY_ID,
   getCity,
@@ -49,6 +48,7 @@ import {
   getUpcomingIslamicEvents,
   ISLAMIC_EVENTS,
 } from './src/domain/islamicCalendar';
+import { FASTING_GUIDANCE } from './src/domain/fasting';
 import {
   installUnhandledExceptionRecorder,
 } from './src/services/diagnostics';
@@ -72,7 +72,6 @@ import { getQuoteOfTheDay } from './src/domain/islamicQuotes';
 import { STORIES } from './src/domain/stories';
 import { resetPostSalahCounts } from './src/domain/tasbeeh';
 import { getDailyVerse, type DailyVerse } from './src/services/dailyVerse';
-import { searchRafiqOnline, type RafiqOnlineAnswer } from './src/services/rafiq';
 import {
   readSyncState,
   type SyncState,
@@ -92,51 +91,6 @@ const PRIMARY_TABS: readonly { screen: PrimaryScreen; label: string; icon: strin
   { screen: 'Guide', label: 'Guidance', icon: '✦' },
   { screen: 'More', label: 'Profile', icon: '◉' },
 ];
-
-const FASTING_GUIDANCE = [
-  {
-    title: 'Ramadan',
-    type: 'Obligatory',
-    detail: 'Fasting is obligatory for eligible Muslims. Exemptions and make-up fasts depend on personal circumstances.',
-    source: 'Qur’an 2:183–185',
-  },
-  {
-    title: 'Mondays and Thursdays',
-    type: 'Voluntary',
-    detail: 'Regularly observed voluntary fast days in the Sunnah.',
-    source: 'Sahih Muslim 1162 · Jami‘ at-Tirmidhi 747',
-  },
-  {
-    title: 'The white days · 13th–15th',
-    type: 'Voluntary',
-    detail: 'Three middle days of each Hijri month, except the 13th of Dhul-Hijjah, which is a day of Tashreeq.',
-    source: 'Sunan Abi Dawud 2449',
-  },
-  {
-    title: 'Six days of Shawwal',
-    type: 'Voluntary',
-    detail: 'Fast six days during Shawwal after Ramadan; do not fast on Eid al-Fitr.',
-    source: 'Sahih Muslim 1164',
-  },
-  {
-    title: 'Day of Arafah · 9 Dhul-Hijjah',
-    type: 'Voluntary',
-    detail: 'A recommended fast for those not performing Hajj.',
-    source: 'Sahih Muslim 1162',
-  },
-  {
-    title: 'Ashura · 10 Muharram',
-    type: 'Voluntary',
-    detail: 'A voluntary fast; some scholars recommend also fasting the 9th or 11th.',
-    source: 'Sahih al-Bukhari 2004 · Sahih Muslim 1132',
-  },
-  {
-    title: 'Every other day',
-    type: 'Voluntary',
-    detail: 'Known as the fast of Dawud; an optional pattern for those able to maintain it.',
-    source: 'Sahih al-Bukhari 1976 · Sahih Muslim 1159',
-  },
-] as const;
 
 function isPrimaryTabActive(tab: PrimaryScreen, screen: Screen): boolean {
   switch (tab) {
@@ -402,14 +356,6 @@ export default function App() {
   const [universalSearchStatus, setUniversalSearchStatus] = useState('');
   const [worshipTab, setWorshipTab] = useState<WorshipTab>('Hadith');
   const [guidanceSection, setGuidanceSection] = useState<'overview' | 'qibla' | 'wellness'>('overview');
-  const [guideQuery, setGuideQuery] = useState('');
-  const [guideAnswer, setGuideAnswer] = useState({
-    title: 'Ready to help',
-    answer: 'Ask about prayer, Qur’an, Hadith, du’a, remembrance, or a Mishkah feature.',
-  });
-  const [guideOnlineAnswer, setGuideOnlineAnswer] = useState<RafiqOnlineAnswer | null>(null);
-  const [guideOnlineError, setGuideOnlineError] = useState('');
-  const [guideOnlineLoading, setGuideOnlineLoading] = useState(false);
   const [systemReport, setSystemReport] = useState<SystemReport | null>(null);
   const [reportBusy, setReportBusy] = useState(false);
   const [syncState, setSyncState] = useState<SyncState | null>(null);
@@ -418,7 +364,6 @@ export default function App() {
   const [refreshingHome, setRefreshingHome] = useState(false);
   const [homePhotoIndex, setHomePhotoIndex] = useState(initialHomePhotoIndex);
   const [journeyStory, setJourneyStory] = useState<(typeof STORIES)[number] | null>(null);
-  const rafiqApiUrl = String(Constants.expoConfig?.extra?.rafiqApiUrl ?? '').trim();
 
   const theme = preferences.theme;
   const palette = PALETTES[theme];
@@ -836,49 +781,6 @@ export default function App() {
     }
   };
 
-  const askGuide = (query: string) => {
-    const cleanQuery = query.trim();
-    setGuideQuery(query);
-    setGuideOnlineAnswer(null);
-    setGuideOnlineError('');
-    if (!cleanQuery) {
-      setGuideAnswer({
-        title: 'Ask a question',
-        answer: 'Type a question or choose an offline topic below to get a focused answer.',
-      });
-      return;
-    }
-    setGuideAnswer(getContextualAnswer(cleanQuery));
-  };
-
-  const searchGuideOnline = async (query: string) => {
-    const cleanQuery = query.trim();
-    if (!cleanQuery) {
-      askGuide('');
-      setGuideOnlineError('Enter a question before searching.');
-      return;
-    }
-    setGuideQuery(cleanQuery);
-    setGuideAnswer(getContextualAnswer(cleanQuery));
-    setGuideOnlineAnswer(null);
-    setGuideOnlineError('');
-    if (!rafiqApiUrl) {
-      setGuideOnlineError('Online answers are not configured in this build. Offline guidance is still available.');
-      return;
-    }
-    setGuideOnlineLoading(true);
-    try {
-      const locale = Platform.OS === 'web' && typeof navigator !== 'undefined'
-        ? navigator.language
-        : 'en';
-      setGuideOnlineAnswer(await searchRafiqOnline(rafiqApiUrl, cleanQuery, locale));
-    } catch (error) {
-      setGuideOnlineError(error instanceof Error ? error.message : 'Rafiq could not complete the online search.');
-    } finally {
-      setGuideOnlineLoading(false);
-    }
-  };
-
   const submitUniversalSearch = (searchQuery = universalSearchQuery) => {
     const query = searchQuery.trim();
     if (!query) return;
@@ -903,10 +805,7 @@ export default function App() {
                   : 'Guide';
     if (opensStories) setWorshipTab('Archives');
     setScreen(destination);
-    if (destination === 'Guide') {
-      setGuidanceSection(/qibla|qiblah/.test(normalized) ? 'qibla' : 'overview');
-      askGuide(query);
-    }
+    if (destination === 'Guide') setGuidanceSection(/qibla|qiblah/.test(normalized) ? 'qibla' : 'overview');
     if (destination === 'Worship') {
       setWorshipTab(/tasbeeh|tasbih|dhikr/.test(normalized)
         ? 'Tasbeeh'
@@ -1008,18 +907,6 @@ export default function App() {
                   <Text style={styles.headerActionGlyph}>⌕</Text>
                   <Text style={styles.headerActionLabel}>Search</Text>
                 </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Open Rafiq AI"
-                  onPress={() => {
-                    setGuidanceSection('overview');
-                    setScreen('Guide');
-                  }}
-                  style={styles.headerActionButton}
-                >
-                  <Text style={styles.headerActionGlyph}>✦</Text>
-                  <Text style={styles.headerActionLabel}>Rafiq</Text>
-                </Pressable>
               </View>
             </View>
           ) : screen === 'PrayerDetails' ? (
@@ -1071,7 +958,7 @@ export default function App() {
                   <Text style={styles.contextHeaderSubtitle}>
                     {screen === 'Worship' ? 'Qur’an, worship and remembrance' :
                       screen === 'Community' ? 'Ideas and community updates' :
-                        screen === 'Guide' ? 'Rafiq · offline and online guidance' :
+                        screen === 'Guide' ? 'Prayer, worship and daily practice' :
                           screen === 'More' ? 'Account, progress and preferences' :
                             screen === 'Global' ? 'Times across your places' :
                               screen === 'Fasting' ? 'Suhoor, iftar and your routine' : 'Make Mishkah yours'}
@@ -1871,102 +1758,16 @@ export default function App() {
           ) : null}
 
           {screen === 'Guide' ? (
-            <>
-              <GuidanceHub
-                city={city}
-                hour={Number(new Intl.DateTimeFormat('en-GB', {
-                  timeZone: city.timeZone,
-                  hour: '2-digit',
-                  hourCycle: 'h23',
-                }).format(now))}
-                initialSection={guidanceSection}
-                palette={palette}
-              />
-              <View style={styles.introBlock}>
-                <Text style={styles.eyebrow}>OPTIONAL AI COMPANION</Text>
-                <Text style={styles.pageTitle}>Ask Rafiq.</Text>
-                <Text style={styles.bodyText}>
-                  Get an instant offline answer, or search for current information and source links when online service is configured.
-                </Text>
-              </View>
-              <View style={styles.assistantCard}>
-                <View style={styles.assistantHeader}>
-                  <View style={styles.assistantMark}>
-                    <Text style={styles.assistantMarkText}>✦</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.assistantTitle}>Rafiq AI</Text>
-                    <Text style={styles.localBadge}>
-                      {rafiqApiUrl ? 'OFFLINE + ONLINE SOURCES' : 'OFFLINE READY · ONLINE NOT CONFIGURED'}
-                    </Text>
-                  </View>
-                </View>
-                <TextInput
-                  accessibilityLabel="Ask a spiritual guidance question"
-                  onChangeText={setGuideQuery}
-                  onSubmitEditing={() => askGuide(guideQuery)}
-                  placeholder="Ask about prayer times or routines…"
-                  placeholderTextColor={palette.muted}
-                  returnKeyType="search"
-                  style={styles.guideInput}
-                  value={guideQuery}
-                />
-                <View style={styles.guideActions}>
-                  <ActionButton
-                    label="Ask offline"
-                    onPress={() => askGuide(guideQuery)}
-                    palette={palette}
-                    styles={styles}
-                  />
-                  <ActionButton
-                    label={guideOnlineLoading ? 'Searching…' : 'Search online'}
-                    onPress={() => void searchGuideOnline(guideQuery)}
-                    palette={palette}
-                    styles={styles}
-                    disabled={guideOnlineLoading}
-                    busy={guideOnlineLoading}
-                  />
-                </View>
-                <View style={styles.answerCard}>
-                  <Text style={styles.answerTitle}>Offline guidance · {guideAnswer.title}</Text>
-                  <Text style={styles.answerText}>{guideAnswer.answer}</Text>
-                </View>
-                {guideOnlineError ? (
-                  <Text accessibilityRole="alert" style={styles.healthMessage}>{guideOnlineError}</Text>
-                ) : null}
-                {guideOnlineAnswer ? (
-                  <View style={styles.answerCard}>
-                    <Text style={styles.answerTitle}>Online answer · verify the sources</Text>
-                    <Text style={styles.answerText}>{guideOnlineAnswer.answer}</Text>
-                    <Text style={styles.sectionCaption}>Sources</Text>
-                    {guideOnlineAnswer.sources.map((source) => (
-                      <Pressable
-                        key={source.url}
-                        accessibilityRole="link"
-                        onPress={() => void openSupportLink(source.url)}
-                        style={styles.faqRow}
-                      >
-                        <Text style={styles.textLink}>{source.title}</Text>
-                        <Text style={styles.faqArrow}>↗</Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : null}
-              </View>
-              <Text style={styles.sectionCaption}>Offline topics</Text>
-              {getLocalFaqs().map((faq) => (
-                <Pressable key={faq.title} onPress={() => askGuide(faq.title)} style={styles.faqRow}>
-                  <Text style={styles.faqText}>{faq.title}</Text>
-                  <Text style={styles.faqArrow}>↗</Text>
-                </Pressable>
-              ))}
-              <View style={styles.disclaimerCard}>
-                <Text style={styles.disclaimerTitle}>A thoughtful companion, not a fatwa.</Text>
-                <Text style={styles.disclaimerText}>
-                  Online answers can be incomplete or out of date. Check primary sources; ask a trusted scholar about personal rulings and a qualified professional about health.
-                </Text>
-              </View>
-            </>
+            <GuidanceHub
+              city={city}
+              hour={Number(new Intl.DateTimeFormat('en-GB', {
+                timeZone: city.timeZone,
+                hour: '2-digit',
+                hourCycle: 'h23',
+              }).format(now))}
+              initialSection={guidanceSection}
+              palette={palette}
+            />
           ) : null}
 
           {screen === 'Worship' ? (
@@ -2063,7 +1864,6 @@ export default function App() {
               {([
                 { title: 'Fasting routine', detail: 'Suhoor, iftar, and your checklist', icon: '☾', target: 'Fasting' },
                 { title: 'Prayer cities', detail: 'Browse and pin places around the world', icon: '◎', target: 'Global' },
-                { title: 'Rafiq AI', detail: 'Local answers and spiritual reminders', icon: '✦', target: 'Guide' },
                 { title: 'Settings', detail: 'Appearance, prayer method, diagnostics', icon: '⚙', target: 'Settings' },
               ] as const).map((item) => (
                 <Pressable accessibilityRole="button" key={item.target} onPress={() => setScreen(item.target)} style={styles.moreListRow}>
@@ -2427,7 +2227,7 @@ export default function App() {
               {universalSearchStatus || 'Search a feature by typing or tapping the microphone.'}
             </Text>
             <ActionButton label="Search and open" onPress={() => submitUniversalSearch()} palette={palette} styles={styles} />
-            <Text style={styles.settingDescription}>Voice search uses your browser microphone when supported. Rafiq’s online answers are separate and require a configured secure service.</Text>
+            <Text style={styles.settingDescription}>Voice search uses your browser microphone when supported.</Text>
           </View>
         </View>
       </Modal>
@@ -3062,20 +2862,6 @@ function createStyles(colors: Palette) {
     checklistTitle: { color: colors.ink, fontSize: 12, fontWeight: '500' },
     completedText: { color: colors.muted, textDecorationLine: 'line-through' },
     checklistDetail: { color: colors.muted, fontSize: 10, marginTop: 4 },
-    assistantCard: { backgroundColor: colors.surface, borderRadius: 21, padding: 17 },
-    assistantHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-    assistantMark: {
-      height: 39,
-      width: 39,
-      borderRadius: 15,
-      backgroundColor: colors.goldTint,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: 11,
-    },
-    assistantMarkText: { color: colors.gold, fontSize: 19 },
-    assistantTitle: { color: colors.ink, fontSize: 14, fontWeight: '600' },
-    localBadge: { color: colors.accent, fontSize: 8, fontWeight: '700', letterSpacing: 1, marginTop: 4 },
     guideInput: {
       minHeight: 47,
       borderWidth: 1,
@@ -3085,7 +2871,6 @@ function createStyles(colors: Palette) {
       paddingHorizontal: 12,
       fontSize: 12,
     },
-    guideActions: { flexDirection: 'row', gap: 8, alignItems: 'stretch' },
     siblingActions: { gap: 8, marginTop: 16 },
     searchInputRow: {
       flexDirection: 'row',
@@ -3119,22 +2904,7 @@ function createStyles(colors: Palette) {
       borderColor: colors.danger,
     },
     dangerActionButtonText: { color: colors.danger },
-    answerCard: { backgroundColor: colors.surfaceRaised, borderRadius: 15, padding: 14, marginTop: 14 },
-    answerTitle: { color: colors.ink, fontSize: 13, fontWeight: '600' },
-    answerText: { color: colors.muted, fontSize: 12, lineHeight: 19, marginTop: 7 },
-    faqRow: {
-      minHeight: 45,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.line,
-    },
-    faqText: { color: colors.ink, fontSize: 12 },
     faqArrow: { color: colors.gold, fontSize: 14 },
-    disclaimerCard: { backgroundColor: colors.goldTint, padding: 15, borderRadius: 15, marginTop: 18 },
-    disclaimerTitle: { color: colors.ink, fontSize: 12, fontWeight: '600' },
-    disclaimerText: { color: colors.muted, fontSize: 11, lineHeight: 17, marginTop: 5 },
     settingsCard: { backgroundColor: colors.surface, borderRadius: 18, padding: 16, marginBottom: 12 },
     moreAccountRow: {
       minHeight: 67,

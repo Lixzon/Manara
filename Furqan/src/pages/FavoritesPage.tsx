@@ -33,6 +33,7 @@ import type { CardContent, TextCardContent } from '../lib/shareCard';
 import { recordXpAction } from '../store/slices/progressSlice';
 
 type Tab = LikeKind;
+type FavoritesScope = 'furqan' | 'mishka';
 
 const TABS: Array<{ value: Tab; label: string; icon: 'stack' | 'book' | 'quote' | 'sparkle' }> = [
   { value: 'surah', label: 'Surahs', icon: 'stack' },
@@ -43,7 +44,13 @@ const TABS: Array<{ value: Tab; label: string; icon: 'stack' | 'book' | 'quote' 
   { value: 'story', label: 'Stories', icon: 'book' },
 ];
 
-export default function FavoritesPage({ embedded = false }: { embedded?: boolean }) {
+export default function FavoritesPage({
+  embedded = false,
+  scope = 'furqan',
+}: {
+  embedded?: boolean;
+  scope?: FavoritesScope;
+}) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { copy } = useXpActions();
@@ -52,8 +59,14 @@ export default function FavoritesPage({ embedded = false }: { embedded?: boolean
   const bookmarks = useAppSelector((s) => s.bookmarks.items);
   const { surahs } = useQuran();
 
+  const visibleTabs = scope === 'mishka'
+    ? TABS.filter((entry) => !['surah', 'ayah'].includes(entry.value))
+    : TABS.filter((entry) => entry.value !== 'story');
+  const defaultTab: Tab = scope === 'mishka' ? 'story' : 'surah';
   const requested = searchParams.get('tab');
-  const tab: Tab = TABS.some((entry) => entry.value === requested) ? (requested as Tab) : 'surah';
+  const tab: Tab = visibleTabs.some((entry) => entry.value === requested)
+    ? requested as Tab
+    : defaultTab;
   const query = searchParams.get('q') ?? '';
   const storySectionParam = searchParams.get('story-section');
   const storySection = STORY_SECTIONS.some((section) => section.id === storySectionParam)
@@ -79,7 +92,7 @@ export default function FavoritesPage({ embedded = false }: { embedded?: boolean
     story: likes.stories.length,
   };
 
-  const total = likes.surahs.length + likes.ayahs.length + likes.hadiths.length + likes.duas.length + likes.quotes.length + likes.stories.length;
+  const visibleTotal = visibleTabs.reduce((sum, entry) => sum + counts[entry.value], 0);
   const needle = query.trim().toLowerCase();
   const matches = (...fields: string[]) =>
     !needle || fields.some((field) => field.toLowerCase().includes(needle));
@@ -201,13 +214,15 @@ export default function FavoritesPage({ embedded = false }: { embedded?: boolean
       {!embedded && (
         <PageHeader
           title="Favorites"
-          subtitle="Your liked content, organized by type and archive."
+          subtitle={scope === 'mishka'
+            ? 'Your saved Mishka stories, supplications, and reflections.'
+            : 'Your saved Quran passages, supplications, and reflections.'}
           right={<XpPill />}
         />
       )}
 
       <div className="mb-3 grid grid-cols-2 gap-1 rounded-2xl bg-surface2 p-1 sm:grid-cols-6" role="tablist" aria-label="Favorite categories">
-        {TABS.map((entry) => {
+        {visibleTabs.map((entry) => {
           const active = tab === entry.value;
           return (
             <button
@@ -264,14 +279,20 @@ export default function FavoritesPage({ embedded = false }: { embedded?: boolean
         </div>
       )}
 
-      {total === 0 && bookmarks.length === 0 ? (
+      {visibleTotal === 0 && (scope === 'mishka' || bookmarks.length === 0) ? (
         <EmptyState
           icon="heart"
           title="No favorites yet"
-          message="Tap a heart on a Quran passage, Hadith, du’a, saying, or story. Your favorites will appear here by category."
+          message={scope === 'mishka'
+            ? 'Tap a heart on a story, Hadith, du’a, or saying in Mishka. Your saved items will appear here.'
+            : 'Tap a heart on a Quran passage, Hadith, du’a, or saying. Your saved items will appear here by category.'}
           action={
-            <button type="button" onClick={() => navigate('/')} className="min-h-12 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-onaccent">
-              Browse surahs
+            <button
+              type="button"
+              onClick={() => navigate(scope === 'mishka' ? '/mishka/library' : '/quran')}
+              className="min-h-12 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-onaccent"
+            >
+              {scope === 'mishka' ? 'Browse Mishka' : 'Browse Quran'}
             </button>
           }
         />
@@ -500,7 +521,7 @@ export default function FavoritesPage({ embedded = false }: { embedded?: boolean
                       </p>
                       <button
                         type="button"
-                        onClick={() => navigate(`/stories?story=${encodeURIComponent(story.id)}`)}
+                        onClick={() => navigate(`/mishka/stories?story=${encodeURIComponent(story.id)}`)}
                         className="mt-1 text-left text-base font-semibold text-ink hover:text-accent"
                       >
                         {story.title}

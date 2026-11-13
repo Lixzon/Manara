@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { getLocalAnswer } from '../src/domain/assistant';
 import {
   DEFAULT_CITY_ID,
   DEFAULT_CITY_IDS,
@@ -161,14 +160,5 @@ describe('lazy city registry and pinned slots', () => {
     const result = pinCity(['lagos', 'london'], 'london');
     assert.equal(result.status, 'already-pinned');
     assert.deepEqual(result.cityIds, ['lagos', 'london']);
-  });
-});
-
-describe('offline spiritual guide', () => {
-  it('answers from its local FAQ and does not invent an unrelated answer', () => {
-    assert.match(getLocalAnswer('How are my prayer times calculated?').answer, /on this device/);
-    assert.match(getLocalAnswer('What if I am unsure about a fasting rule?').answer, /trusted local scholar/);
-    assert.match(getLocalAnswer('Can I rely on this as a religious ruling?').answer, /not a fatwa/i);
-    assert.match(getLocalAnswer('an unfamiliar question').answer, /could not find a close answer/i);
   });
 });

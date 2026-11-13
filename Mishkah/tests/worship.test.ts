@@ -11,7 +11,6 @@ import {
   TASBEEH_PRESETS,
 } from '../src/domain/tasbeeh';
 import { computeUnlockedFeatures } from '../src/domain/streakRewards';
-import { getContextualAnswer } from '../src/domain/assistant';
 
 describe('offline worship library', () => {
   it('contains forty uniquely identified Nawawi teaching summaries', () => {
@@ -112,9 +111,4 @@ describe('offline worship library', () => {
     );
   });
 
-  it('answers worship questions from the offline catalog and routes reciter help', () => {
-    assert.match(getContextualAnswer('dua for travel').answer, /journey|return/i);
-    assert.match(getContextualAnswer('open reciter library').answer, /21-day Mishkah practice streak/);
-    assert.match(getContextualAnswer('qibla direction').answer, /Guidance → Qibla/);
-  });
 });

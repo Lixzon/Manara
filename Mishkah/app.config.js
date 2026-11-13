@@ -28,7 +28,6 @@ module.exports = ({ config }) => {
     },
     extra: {
       ...config.extra,
-      rafiqApiUrl: process.env.EXPO_PUBLIC_RAFIQ_API_URL ?? '',
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL ?? '',
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '',
       furqanBaseUrl: process.env.EXPO_PUBLIC_FURQAN_URL?.trim() || 'https://furqan-quran-app.vercel.app',

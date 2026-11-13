@@ -1,7 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '../store';
-import { totalLikedItems } from '../store/slices/likesSlice';
 import { PageHeader } from '../components/ui/common';
 import { Icon } from '../components/ui/Icon';
 import FavoritesPage from './FavoritesPage';
@@ -27,7 +26,8 @@ export default function LibraryPage() {
   const section: LibrarySection = SECTIONS.some((item) => item.id === sectionParam)
     ? (sectionParam as LibrarySection)
     : 'favorites';
-  const favoriteCount = totalLikedItems(likes) + bookmarks;
+  const favoriteCount = likes.surahs.length + likes.ayahs.length + likes.hadiths.length +
+    likes.duas.length + likes.quotes.length + bookmarks;
 
   const selectSection = (next: LibrarySection) => {
     const params = new URLSearchParams(searchParams);
@@ -77,7 +77,7 @@ export default function LibraryPage() {
             <p className="mt-0.5 text-[11px] text-mut">Short reads, clear sources, and complete context.</p>
           </div>
         </div>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2">
           <CollectionLink
             to="/quotes?view=sayings"
             eyebrow="WORDS TO KEEP"
@@ -93,14 +93,6 @@ export default function LibraryPage() {
             detail="Browse by moment and intention."
             icon="sparkle"
             tone="green"
-          />
-          <CollectionLink
-            to="/stories"
-            eyebrow="THE ARCHIVE"
-            title="Stories & history"
-            detail="A brief introduction, then read the full account."
-            icon="book"
-            tone="blue"
           />
         </div>
       </section>

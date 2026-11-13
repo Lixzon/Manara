@@ -30,8 +30,7 @@ export function appSectionForPath(pathname: string): AppSection {
     pathname === '/journey' ||
     pathname.startsWith('/mishka/') ||
     pathname === '/stories' ||
-    pathname === '/quotes' ||
-    pathname === '/mishkah'
+    pathname === '/quotes'
     ? 'mishka'
     : 'furqan';
 }
@@ -47,6 +46,7 @@ export function isSectionNavItemActive(pathname: string, item: SectionNavItem): 
     return pathname === item.to ||
       pathname.startsWith('/mishka/archives') ||
       pathname.startsWith('/mishka/favorites') ||
+      pathname.startsWith('/mishka/stories') ||
       pathname === '/stories' ||
       pathname === '/quotes';
   }
