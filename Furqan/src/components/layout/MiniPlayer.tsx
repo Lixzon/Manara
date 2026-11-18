@@ -8,7 +8,7 @@ import { Icon } from '../ui/Icon';
 import { SurahArtwork } from '../ui/SurahArtwork';
 
 /** Dockable mini player bar shown above the bottom navigation. */
-export function MiniPlayer() {
+export function MiniPlayer({ isHidden = false }: { isHidden?: boolean }) {
   const p = useAppSelector((s) => s.player);
   const readingMode = useAppSelector((s) => s.settings.readingMode);
   const quran = useQuran();
@@ -29,7 +29,9 @@ export function MiniPlayer() {
 
   return (
     <div
-      className={`mini-player-position pointer-events-none fixed inset-x-0 z-40 md:left-60 ${positionClass}`}
+      className={
+        `mini-player-position pointer-events-none fixed inset-x-0 z-40 md:left-60 md:translate-y-0 transition-transform duration-300 ease-out ${isHidden ? 'translate-y-full' : 'translate-y-0'} ${positionClass}`
+      }
     >
       <div
         onClick={() => navigate('/player')}
@@ -57,7 +59,7 @@ export function MiniPlayer() {
                 <span className="eq"><span /><span /><span /></span>
                 {reciter.label}
               </span>
-            ) : <span>Paused Â· {reciter.label}</span>}
+            ) : <span>Paused · {reciter.label}</span>}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-0.5" onClick={(event) => event.stopPropagation()}>
@@ -70,13 +72,13 @@ export function MiniPlayer() {
             {p.playbackRate}x
           </button>
           <button type="button" aria-label="Previous surah" title="Previous surah" className="pressable rounded-full p-1.5 text-mut hover:bg-surface2" onClick={() => player.previous()}>
-            <Icon name="prev" size={19} />
+            <Icon name="prev" size={18} />
           </button>
           <button type="button" aria-label={p.isPlaying ? 'Pause playback' : 'Play playback'} title={p.isPlaying ? 'Pause' : 'Play'} className="pressable flex h-11 w-11 items-center justify-center rounded-full bg-accent text-onaccent shadow-card" onClick={() => player.togglePlay()}>
             <Icon name={p.isPlaying ? 'pause' : 'play'} size={20} />
           </button>
           <button type="button" aria-label="Next surah" title="Next surah" className="pressable rounded-full p-1.5 text-mut hover:bg-surface2" onClick={() => player.next()}>
-            <Icon name="next" size={19} />
+            <Icon name="next" size={18} />
           </button>
           <button type="button" aria-label="Close player" title="Stop playback and close player" className="pressable rounded-full p-1.5 text-mut hover:bg-surface2 hover:text-danger" onClick={() => player.stop()}>
             <Icon name="close" size={17} />
