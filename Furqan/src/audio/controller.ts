@@ -545,6 +545,7 @@ class PlayerController {
       this.rangeAyahRepeated?.();
       const el = this.ensureEl();
       const d = Number.isFinite(el.duration) ? el.duration : 0;
+      // Seek to the start time of the beginning verse in the range
       const target = d > 0 ? this.ayahStartTime(s.range.start, s.ayahCount, d) : 0;
       try {
         el.currentTime = target;
@@ -552,7 +553,9 @@ class PlayerController {
         /* ignore seek errors */
       }
       this.indexFloor = s.range.start;
+      // Always patch to ensure the range start ayah and currentTime are set correctly
       this.patch({ ayah: s.range.start, currentTime: target });
+      // Play from the seeked position - this creates the loop effect
       void this.playElement();
       return;
     }

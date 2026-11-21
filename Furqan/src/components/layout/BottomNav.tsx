@@ -24,7 +24,7 @@ export function BottomNav() {
                 <div className={`rounded-full p-1.5 ${isActive ? 'bg-accent/12' : 'bg-transparent'}`}>
                   <Icon name={item.icon} size={24} />
                 </div>
-                <span>{item.label}</span>
+                <span className="text-xs">{item.label}</span>
                 <span className={`h-1 w-1 rounded-full ${isActive ? 'bg-accent' : 'bg-transparent'}`} />
               </>
             </NavLink>
